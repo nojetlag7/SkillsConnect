@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { createClient } from '@supabase/supabase-js';
+import e from 'express';
 
 dotenv.config(); // loading environment variables from .env file
 
@@ -27,7 +28,7 @@ app.use(express.urlencoded({ extended: false }));
 
 
 
-//simple signup route
+//simple signup route with create auth user and profile
 app.post('/auth/signup', async (req, res) => {
     try{
         const { email, password } = req.body;
@@ -132,21 +133,51 @@ async function authenticate(req, res, next) {
     }
 }
 
-//read user profile
-app.get('/profile', authenticate, async (req, res) => {
+//get all users
+app.get('/users', authenticate, async (req, res) => {
     try {
-        const userId = req.user.id;
-        const { data, error } = await supabase
+        const { data, error } = await supabaseAdmin
+            .from('profiles')
+            .select('*');
+
+        if (error) {
+            console.error('Error fetching users:', error);
+            return res.status(400).json({ error: 'Failed to fetch users' });
+        }
+
+        res.status(200).json({ users: data.map(user => user.id) });
+    } catch (e) {
+        console.error('Unexpected error fetching users:', e);
+        res.status(500).json({ error: 'An unexpected error occurred. Please try again later.' });
+    }
+});
+
+//read user profile
+app.get('/profile/:id', authenticate, async (req, res) => {
+    try {
+        if(!req.user) return res.status(401).json({ error: 'Unauthorized' });
+        const userId = req.params.id;
+
+        if (req.user.id !== userId && !supabaseAdmin) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
+        // using admin client when available to bypass RLS
+        const client = supabaseAdmin ?? supabase;
+
+        const { data, error } = await client
             .from('profiles')
             .select('*')
             .eq('id', userId)
-            .single();
+            .maybeSingle();
 
         if (error) {
             console.error('Error fetching user profile:', error);
             return res.status(404).json({ error: 'User not found' });
         }
-
+        if (!data) {
+            return res.status(404).json({ error: 'User not found' });
+        }
         res.status(200).json({ profile: data });
     } catch (e) {
         console.error('Unexpected error fetching user profile:', e);
@@ -155,23 +186,24 @@ app.get('/profile', authenticate, async (req, res) => {
 });
 
 //update user profile
-app.put('/profile', authenticate, async (req, res) => {
+app.put('/profile/:id', authenticate, async (req, res) => {
     try {
-        const userId = req.user.id;
-        const { name, email , skills, bio, location } = req.body;
+        const userId = req.params.id;
+        const { name, email, skills, bio, location } = req.body;
 
-        const { data, error } = await supabase
+        const { data, error } = await supabaseAdmin
             .from('profiles')
-            .update({ full_name: name, email, skills, bio, location })
+            .update({ name, email, skills, bio, location })
             .eq('id', userId)
-            .single();
+            .select()
+            .maybeSingle();
 
         if (error) {
             console.error('Error updating user profile:', error);
             return res.status(400).json({ error: 'Failed to update profile' });
         }
 
-        res.status(200).json({ profile: data });
+        res.status(200).json({ message: 'Profile updated successfully', profile: data});
     } catch (e) {
         console.error('Unexpected error updating user profile:', e);
         res.status(500).json({ error: 'An unexpected error occurred. Please try again later.' });
@@ -179,10 +211,10 @@ app.put('/profile', authenticate, async (req, res) => {
 });
 
 //delete user profile
-app.delete('/profile', authenticate, async (req, res) => {
+app.delete('/profile/:id', authenticate, async (req, res) => {
     try {
-        const userId = req.user.id;
-        const { data, error } = await supabase
+        const userId = req.params.id;
+        const { data, error } = await supabaseAdmin
             .from('profiles')
             .delete()
             .eq('id', userId);
