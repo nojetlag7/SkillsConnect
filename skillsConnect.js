@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { createClient } from '@supabase/supabase-js';
-import e from 'express';
+
 
 dotenv.config(); // loading environment variables from .env file
 
@@ -235,3 +235,7 @@ app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 }); //showing that app is running on the specified port
 
+//todo 
+// conversation routes
+// message routes
+// additional error handling and input validation as needed
