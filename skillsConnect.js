@@ -189,24 +189,44 @@ app.get('/profile/:id', authenticate, async (req, res) => {
 app.put('/profile/:id', authenticate, async (req, res) => {
     try {
         const userId = req.params.id;
-        const { name, email, skills, bio, location } = req.body;
 
-        const { data, error } = await supabaseAdmin
+        // allow only owner or admin
+        if (req.user.id !== userId && !supabaseAdmin) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
+        // build updates from allowed keys present in body
+        const allowed = ['name', 'email', 'skills', 'bio', 'location'];
+        const updates = Object.fromEntries(
+            Object.entries(req.body).filter(([k, v]) => allowed.includes(k) && v !== undefined)
+        );
+
+        if (Object.keys(updates).length === 0) {
+            return res.status(400).json({ error: 'No updatable fields provided' });
+        }
+
+        const client = supabaseAdmin ?? supabase;
+        const { data, error } = await client
             .from('profiles')
-            .update({ name, email, skills, bio, location })
+            .update(updates)
             .eq('id', userId)
-            .select()
-            .maybeSingle();
+            .select('*')         // explicitly request all columns
+            .maybeSingle();      // avoid throwing if zero rows
 
         if (error) {
             console.error('Error updating user profile:', error);
             return res.status(400).json({ error: 'Failed to update profile' });
         }
 
-        res.status(200).json({ message: 'Profile updated successfully', profile: data});
+        if (!data) {
+            return res.status(404).json({ error: 'Profile not found' });
+        }
+
+        // return the updated profile (or use 204 if you prefer no body)
+        return res.status(200).json({ message: 'Profile updated successfully', profile: data });
     } catch (e) {
         console.error('Unexpected error updating user profile:', e);
-        res.status(500).json({ error: 'An unexpected error occurred. Please try again later.' });
+        return res.status(500).json({ error: 'An unexpected error occurred. Please try again later.' });
     }
 });
 
