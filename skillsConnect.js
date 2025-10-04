@@ -121,6 +121,7 @@ async function authenticate(req, res, next) {
         // prefer admin client for getUser if available (works with service role)
         const client = supabaseAdmin ?? supabase;
         const resp = await client.auth.getUser(token);
+        //getting the user associated with the token by decoding the JWT token
         const user = resp?.data?.user ?? null;
         const err = resp?.error ?? null;
         if (err || !user) return res.status(401).json({ error: 'Invalid or expired token' });
@@ -258,4 +259,5 @@ app.listen(PORT, () => {
 //todo 
 // conversation routes
 // message routes
-// additional error handling and input validation as needed
+// additional error handling and input validation as needed 
+// and postman collection for testing the endpoints
