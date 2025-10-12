@@ -13,8 +13,7 @@ async function run(){
 	const model =  genAI.getGenerativeModel({model: 'gemini-2.0-flash'});
 	const prompt = 'Write a poem about a lost painter';
 
-	const result = await model.generateContent(prompt);
-	const res = await result.response;
+	const res = (await model.generateContent(prompt)).response;
 	const text = res.text();
 	console.log(text);
 }
