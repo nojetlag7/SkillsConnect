@@ -4,6 +4,8 @@ import cookieParser from 'cookie-parser';
 import authRouter from './routes/auth.js';
 import profilesRouter from './routes/profiles.js';
 import messagesRouter from './routes/messages.js';
+import aiRouter from './routes/ai.js';
+import matchRouter from './routes/match.js';
 import { createClient } from '@supabase/supabase-js';
 
 
@@ -20,6 +22,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/auth', authRouter);
 app.use('/profiles', profilesRouter); // now exposes /profiles/users and /profiles/users/:id
 app.use('/', messagesRouter); // exposes /conversations, /messages, /messages/stream at root
+app.use('/ai', aiRouter); // /ai/match
+app.use('/', matchRouter); // /match
 
 
 
