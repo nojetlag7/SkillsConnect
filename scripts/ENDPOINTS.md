@@ -15,7 +15,7 @@ Tip: Log in first to get `session.access_token`, then set it as a Postman collec
 
 ## 1) Auth
 
-### POST /auth/signup
+### POST /auth/signup (TESTED)
 - Purpose: Create an auth user and a profile row.
 - Auth: Not required
 - Body (JSON):
@@ -35,7 +35,7 @@ Tip: Log in first to get `session.access_token`, then set it as a Postman collec
 ```
 - Notes: If the user already exists, you’ll get a 400 with an error message.
 
-### POST /auth/login
+### POST /auth/login (TESTED)
 - Purpose: Sign in and retrieve an access token
 - Auth: Not required
 - Body (JSON):
@@ -59,7 +59,7 @@ Tip: Log in first to get `session.access_token`, then set it as a Postman collec
 
 ---
 
-## 2) Profiles (mounted at /profiles)
+## 2) Profiles (mounted at /profiles) (TESTED)
 All routes below require Authorization: Bearer {{token}}
 
 ### GET /profiles/users
@@ -71,7 +71,7 @@ All routes below require Authorization: Bearer {{token}}
 }
 ```
 
-### GET /profiles/users/:id
+### GET /profiles/users/:id (TESTED)
 - Purpose: Get a specific user profile
 - Params: `:id` is the user id (uuid)
 - Success 200:
@@ -89,7 +89,7 @@ All routes below require Authorization: Bearer {{token}}
 }
 ```
 
-### PUT /profiles/users/:id
+### PUT /profiles/users/:id (TESTED)
 - Purpose: Update allowed fields of a profile (owner or admin)
 - Body (any subset of): { name, email, skills, bio, location }
 - Example body:
@@ -234,7 +234,7 @@ OR
 
 ---
 
-## 6) Match (DB + AI chaining)
+## 6) Match (DB + AI chaining) (Tested)
 
 ### POST /match
 - Purpose: Load user skills and task requirements from DB, then call AI to compute match

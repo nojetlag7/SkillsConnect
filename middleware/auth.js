@@ -1,6 +1,6 @@
-import { supabase, supabaseAdmin } from "../clients/supabaseClient";
+import { supabase, supabaseAdmin } from "../clients/supabaseClient.js";
 
-export default async function authenticate(req, res, next) {
+export async function authenticate(req, res, next) {
     try {
         const authHeader = req.headers.authorization;
         const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : req.cookies?.access_token;
@@ -21,3 +21,5 @@ export default async function authenticate(req, res, next) {
         return res.status(500).json({ error: 'Auth error' });
     }
 }
+
+export default authenticate;
