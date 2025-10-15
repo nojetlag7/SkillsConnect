@@ -266,3 +266,95 @@ OR
 5) SSE > GET /messages/stream & GET /conversations/stream
 6) AI > POST /ai/match
 7) Match > POST /match (with a valid user_id & task_id)
+
+---
+
+## 7) Tasks (root-level)
+All routes below require Authorization: Bearer {{token}}
+
+Notes
+- requirements is expected to be a text[] on the tasks table (e.g., ["react", "firebase"]).
+- Responses here reflect the current API: arrays are returned directly for list endpoints, not wrapped.
+
+### GET /tasks
+- Purpose: List tasks (newest-first)
+- Query params:
+  - limit (optional, default 20)
+  - offset (optional, default 0)
+- Example: `/tasks?limit=10&offset=0`
+- Success 200:
+```json
+[
+  {
+    "id": "<uuid>",
+    "title": "Frontend Intern",
+    "description": "Assist with React components",
+    "requirements": ["react", "javascript", "css"],
+    "created_at": "..."
+  }
+]
+```
+
+### POST /tasks
+- Purpose: Create a new task
+- Body (JSON):
+```json
+{
+  "title": "Frontend Intern",
+  "description": "Assist with React components",
+  "requirements": ["react", "javascript", "css"]
+}
+```
+- Success 201:
+```json
+{
+  "id": "<uuid>",
+  "title": "Frontend Intern",
+  "description": "Assist with React components",
+  "requirements": ["react", "javascript", "css"],
+  "created_at": "..."
+}
+```
+
+### GET /tasks/:id
+- Purpose: Fetch a single task by id
+- Params: `:id` is the task id (uuid)
+- Success 200:
+```json
+{
+  "id": "<uuid>",
+  "title": "Frontend Intern",
+  "description": "Assist with React components",
+  "requirements": ["react", "javascript", "css"],
+  "created_at": "..."
+}
+```
+- 404 if not found.
+
+### PUT /tasks/:id
+- Purpose: Update a task
+- Body (any subset of): { title, description, requirements }
+- Example body:
+```json
+{
+  "title": "Frontend Intern (Updated)",
+  "requirements": ["react", "javascript", "css", "testing"]
+}
+```
+- Success 200:
+```json
+{
+  "id": "<uuid>",
+  "title": "Frontend Intern (Updated)",
+  "description": "Assist with React components",
+  "requirements": ["react", "javascript", "css", "testing"],
+  "created_at": "..."
+}
+```
+- 404 if not found.
+
+### DELETE /tasks/:id
+- Purpose: Delete a task
+- Success: 204 No Content
+
+Tip: Create a task first with POST /tasks and use its id for the /match endpoint.
