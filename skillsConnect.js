@@ -19,7 +19,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 
 
-app.use('/auth', authRouter);
+app.use('/auth', authRouter); // /login and /signup
 app.use('/profiles', profilesRouter); // now exposes /profiles/users and /profiles/users/:id
 app.use('/', messagesRouter); // exposes /conversations, /messages, /messages/stream at root
 app.use('/ai', aiRouter); // /ai/match
